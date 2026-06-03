@@ -58,7 +58,10 @@
             </div>
             <h1 class="text-base font-bold text-gray-800 tracking-tight">baba pdf organizer</h1>
         </div>
-        <div class="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full">(works offline)</div>
+        <div class="flex items-center gap-2">
+            <button id="installBtn" class="hidden text-xs font-semibold bg-indigo-600 text-white px-2.5 py-1 rounded-full active:scale-95 hover:bg-indigo-700 transition-all">Install App</button>
+            <div class="text-xs font-semibold bg-indigo-50 text-indigo-700 px-2.5 py-1 rounded-full">(works offline)</div>
+        </div>
     </header>
 
     <!-- Main Content Panel -->
@@ -487,6 +490,31 @@
                     .catch(err => console.error('Service Worker registration failed:', err));
             });
         }
+
+        // PWA Installation helper
+        let deferredPrompt;
+        const installBtn = document.getElementById('installBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.classList.remove('hidden');
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`PWA install choice: ${outcome}`);
+            deferredPrompt = null;
+            installBtn.classList.add('hidden');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            installBtn.classList.add('hidden');
+            console.log('PWA installed');
+        });
     </script>
 </body>
 </html>
